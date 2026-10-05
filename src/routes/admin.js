@@ -13,9 +13,13 @@ router.get('/', (req, res) => {
               (SELECT COUNT(*) FROM vendors WHERE status='approved')    AS shops,
               (SELECT COUNT(*) FROM vendors WHERE status='pending')     AS pending,
               (SELECT COUNT(*) FROM products WHERE status='active')     AS products,
-              (SELECT COUNT(*) FROM orders)                             AS orders,
-              (SELECT COALESCE(SUM(total_cents),0) FROM orders)         AS gmv,
-              (SELECT COALESCE(SUM(commission_cents),0) FROM order_items) AS commission`
+              (SELECT COUNT(*) FROM orders WHERE status IN ('paid','shipped','delivered'))        AS orders,
+              (SELECT COALESCE(SUM(total_cents),0) FROM orders
+                 WHERE status IN ('paid','shipped','delivered'))                                  AS gmv,
+              (SELECT COALESCE(SUM(oi.commission_cents),0) FROM order_items oi
+                 JOIN orders o ON o.id = oi.order_id
+                 WHERE o.status IN ('paid','shipped','delivered'))                                AS commission,
+              (SELECT COUNT(*) FROM orders WHERE status = 'awaiting_payment')                     AS unpaid`
     )
     .get();
 
@@ -25,7 +29,9 @@ router.get('/', (req, res) => {
               COALESCE(SUM(oi.unit_price_cents * oi.qty), 0) AS gross,
               COALESCE(SUM(oi.commission_cents), 0)          AS commission,
               COALESCE(SUM(oi.qty), 0)                       AS units
-       FROM vendors v LEFT JOIN order_items oi ON oi.vendor_id = v.id
+       FROM vendors v
+       LEFT JOIN order_items oi ON oi.vendor_id = v.id
+         AND oi.order_id IN (SELECT id FROM orders WHERE status IN ('paid','shipped','delivered'))
        WHERE v.status = 'approved'
        GROUP BY v.id ORDER BY gross DESC`
     )
@@ -112,9 +118,19 @@ router.get('/orders', (req, res) => {
 });
 
 router.post('/orders/:id/status', (req, res) => {
-  const status = ['paid', 'shipped', 'delivered', 'cancelled'].includes(req.body.status) ? req.body.status : null;
-  if (status) {
-    db.prepare('UPDATE orders SET status = ? WHERE id = ?').run(status, parseInt(req.params.id, 10));
+  const order = db.prepare('SELECT * FROM orders WHERE id = ?').get(parseInt(req.params.id, 10));
+  const status = ['shipped', 'delivered', 'cancelled'].includes(req.body.status) ? req.body.status : null;
+
+  // Only the payment provider may mark an order paid. An admin can cancel an
+  // unpaid order, but cannot declare that money arrived.
+  if (!order) {
+    flash(req, 'warn', 'That order no longer exists.');
+  } else if (!status) {
+    flash(req, 'warn', 'An order cannot be marked paid by hand - that comes from the payment provider.');
+  } else if (order.status === 'awaiting_payment' && status !== 'cancelled') {
+    flash(req, 'warn', `Order #${order.id} has not been paid yet, so it can only be cancelled.`);
+  } else {
+    db.prepare('UPDATE orders SET status = ? WHERE id = ?').run(status, order.id);
     flash(req, 'ok', `Order marked ${status}.`);
   }
   res.redirect(req.get('Referer') || '/admin/orders');

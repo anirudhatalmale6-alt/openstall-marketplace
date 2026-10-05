@@ -32,9 +32,26 @@ function initials(title) {
     .join('');
 }
 
+const STATUS_CLASS = {
+  delivered: 'green',
+  shipped: 'blue',
+  paid: 'amber',
+  awaiting_payment: 'grey',
+  cancelled: 'red',
+  processing: 'grey',
+};
+
+function statusClass(status) {
+  return STATUS_CLASS[status] || 'grey';
+}
+
+function statusLabel(status) {
+  return status === 'awaiting_payment' ? 'awaiting payment' : status;
+}
+
 // Uploaded photo if the seller added one, otherwise generated cover art.
 function imgFor(product) {
   return product && product.image ? `/uploads/${product.image}` : `/img/p/${product.id}.svg`;
 }
 
-module.exports = { money, slugify, parsePrice, artColors, initials, imgFor };
+module.exports = { money, slugify, parsePrice, artColors, initials, imgFor, statusClass, statusLabel };

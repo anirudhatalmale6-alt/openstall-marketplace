@@ -54,10 +54,33 @@ is unlisted rather than deleted.
 
 ## Payments
 
-Checkout currently records the order without charging a card — it is clearly labelled as demo
-mode in the UI. The commission split is already calculated and stored per order line, so moving
-to Stripe Connect (each seller onboarded, paid directly, marketplace keeps its fee) is a
-configuration and webhook step rather than a rewrite.
+Checkout does not talk to a payment company directly. It creates the order, reserves stock,
+then hands the order to whichever provider `PAYMENT_PROVIDER` names. Two shapes are supported:
+charged inline, and hosted redirect where the provider's webhook is what confirms payment.
+See `src/payments/README.md` for the interface and how to add a provider.
+
+Orders are created as `awaiting_payment` and only the provider can move them to `paid`. An
+admin can cancel an unpaid order but cannot declare that money arrived, sellers never see an
+unpaid order in their fulfilment queue, and unpaid orders are excluded from GMV and commission.
+A failed or cancelled payment puts the reserved stock back.
+
+Two providers ship with the prototype, both simulated and neither able to move money:
+`demo` (default, instant success) and `sandbox-redirect` (hosted-redirect shape, used to
+exercise the webhook path end to end). The real provider is not chosen yet.
+
+## Tests
+
+Both suites drive a real browser against a running server and need a freshly seeded database,
+because they register accounts and approve shops:
+
+```bash
+npm run seed && PORT=4310 node server.js &
+python3 test/e2e-journeys.py                 # 40 checks: buyer, seller, admin journeys
+
+npm run seed
+PORT=4311 PAYMENT_PROVIDER=sandbox-redirect node server.js &
+BASE=http://localhost:4311 python3 test/e2e-payments.py   # 23 checks: the payment layer
+```
 
 ## Layout
 
@@ -67,9 +90,11 @@ src/db.js            SQLite schema
 src/seed.js          demo data
 src/helpers.js       money/slug/price/cover-art helpers
 src/guards.js        requireUser / requireSeller / requireAdmin
-src/routes/          shop, auth, cart, seller, admin
+src/payments/        provider interface + demo and sandbox-redirect adapters
+src/routes/          shop, auth, cart, payments, seller, admin
 views/               EJS templates (partials/, seller/, admin/)
 public/css/app.css   hand-written stylesheet, no CDN
+test/                end-to-end Playwright suites
 screenshots/         current state of every screen
 ```
 

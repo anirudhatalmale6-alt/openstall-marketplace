@@ -1,5 +1,6 @@
 const express = require('express');
 const db = require('../db');
+const payments = require('../payments');
 const { flash, requireUser } = require('../guards');
 
 const router = express.Router();
@@ -79,7 +80,7 @@ router.get('/checkout', requireUser, (req, res) => {
   res.render('checkout', { title: 'Checkout', cart, form: { ship_name: req.user.name } });
 });
 
-router.post('/checkout', requireUser, (req, res) => {
+router.post('/checkout', requireUser, async (req, res, next) => {
   const cart = readCart(req);
   if (!cart.lines.length) return res.redirect('/cart');
 
@@ -106,10 +107,11 @@ router.post('/checkout', requireUser, (req, res) => {
         throw Object.assign(new Error('stock'), { soldOut: line.product.title });
       }
     }
+    // Created unpaid. Only the payment provider may move it to 'paid'.
     const orderId = db
       .prepare(
         `INSERT INTO orders (buyer_id, total_cents, status, ship_name, ship_address, ship_city, ship_zip, ship_country)
-         VALUES (?, ?, 'paid', ?, ?, ?, ?, ?)`
+         VALUES (?, ?, 'awaiting_payment', ?, ?, ?, ?, ?)`
       )
       .run(req.user.id, cart.total, form.ship_name, form.ship_address, form.ship_city, form.ship_zip, form.ship_country)
       .lastInsertRowid;
@@ -144,9 +146,44 @@ router.post('/checkout', requireUser, (req, res) => {
     throw err;
   }
 
+  // Hand the order to whichever provider this deployment is configured with.
+  const provider = payments.active();
+  const order = db.prepare('SELECT * FROM orders WHERE id = ?').get(orderId);
+  const items = db.prepare('SELECT * FROM order_items WHERE order_id = ?').all(orderId);
+
+  let outcome;
+  try {
+    outcome = await provider.begin({
+      order,
+      items,
+      buyer: req.user,
+      returnUrl: `/payments/return/${orderId}`,
+    });
+  } catch (err) {
+    err.orderId = orderId;
+    return next(err);
+  }
+
+  payments.record({
+    orderId,
+    provider: provider.name,
+    reference: outcome.reference,
+    status: outcome.status,
+    amountCents: order.total_cents,
+  });
+
   req.session.cart = {};
-  flash(req, 'ok', 'Payment accepted. Your order is on its way.');
-  res.redirect(`/order/${orderId}`);
+
+  if (outcome.status === 'paid') {
+    db.prepare(`UPDATE orders SET status = 'paid' WHERE id = ?`).run(orderId);
+    payments.markSettled({ orderId, provider: provider.name, reference: outcome.reference, status: 'paid' });
+    flash(req, 'ok', 'Payment accepted. Your order is on its way.');
+    return res.redirect(`/order/${orderId}`);
+  }
+
+  // Hosted checkout: the buyer pays on the provider's page and the webhook
+  // confirms it. Coming back from the redirect is not proof of payment.
+  return res.redirect(outcome.redirectUrl);
 });
 
 router.get('/order/:id', requireUser, (req, res, next) => {

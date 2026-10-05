@@ -5,7 +5,7 @@ const session = require('express-session');
 const SQLiteStore = require('connect-sqlite3')(session);
 
 const db = require('./src/db');
-const { money, imgFor } = require('./src/helpers');
+const { money, imgFor, statusClass, statusLabel } = require('./src/helpers');
 
 const app = express();
 const PORT = process.env.PORT || 4310;
@@ -43,6 +43,8 @@ app.use((req, res, next) => {
   res.locals.categories = db.prepare('SELECT * FROM categories ORDER BY name').all();
   res.locals.money = money;
   res.locals.imgFor = imgFor;
+  res.locals.statusClass = statusClass;
+  res.locals.statusLabel = statusLabel;
   res.locals.flash = req.session.flash || null;
   res.locals.path = req.path;
   res.locals.q = '';
@@ -53,6 +55,7 @@ app.use((req, res, next) => {
 app.use('/', require('./src/routes/shop'));
 app.use('/', require('./src/routes/auth'));
 app.use('/', require('./src/routes/cart'));
+app.use('/payments', require('./src/routes/payments'));
 app.use('/seller', require('./src/routes/seller'));
 app.use('/admin', require('./src/routes/admin'));
 

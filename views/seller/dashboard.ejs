@@ -49,7 +49,7 @@
                     <td class="small"><%= r.ship_name %></td>
                     <td class="num"><%= r.qty %></td>
                     <td class="num mono"><%= money(r.unit_price_cents * r.qty) %></td>
-                    <td><span class="badge <%= r.fulfil_status === 'delivered' ? 'green' : r.fulfil_status === 'shipped' ? 'blue' : 'grey' %>"><%= r.fulfil_status %></span></td>
+                    <td><span class="badge <%= statusClass(r.fulfil_status) %>"><%= statusLabel(r.fulfil_status) %></span></td>
                   </tr>
                 <% }); %>
               </tbody>

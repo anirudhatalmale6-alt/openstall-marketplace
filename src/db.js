@@ -77,6 +77,18 @@ CREATE TABLE IF NOT EXISTS order_items (
   fulfil_status    TEXT    NOT NULL DEFAULT 'processing' -- processing | shipped | delivered
 );
 
+CREATE TABLE IF NOT EXISTS payments (
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  order_id     INTEGER NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+  provider     TEXT    NOT NULL,                       -- whichever adapter handled it
+  reference    TEXT    NOT NULL,                       -- the provider's own id for the payment
+  status       TEXT    NOT NULL,                       -- pending | paid | failed
+  amount_cents INTEGER NOT NULL,
+  created_at   TEXT    NOT NULL DEFAULT (datetime('now')),
+  settled_at   TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_payments_order ON payments(order_id);
 CREATE INDEX IF NOT EXISTS idx_products_vendor   ON products(vendor_id);
 CREATE INDEX IF NOT EXISTS idx_products_category ON products(category_id);
 CREATE INDEX IF NOT EXISTS idx_items_order       ON order_items(order_id);

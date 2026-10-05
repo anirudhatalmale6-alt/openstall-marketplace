@@ -30,12 +30,15 @@ router.get('/', (req, res) => {
               COALESCE(SUM(oi.commission_cents), 0)          AS commission,
               COALESCE(SUM(oi.qty), 0)                       AS units,
               COUNT(DISTINCT oi.order_id)                    AS orders
-       FROM order_items oi WHERE oi.vendor_id = ?`
+       FROM order_items oi JOIN orders o ON o.id = oi.order_id
+       WHERE oi.vendor_id = ? AND o.status IN ('paid', 'shipped', 'delivered')`
     )
     .get(v.id);
   const open = db
     .prepare(
-      `SELECT COUNT(*) n FROM order_items WHERE vendor_id = ? AND fulfil_status <> 'delivered'`
+      `SELECT COUNT(*) n FROM order_items oi JOIN orders o ON o.id = oi.order_id
+       WHERE oi.vendor_id = ? AND oi.fulfil_status <> 'delivered'
+         AND o.status IN ('paid', 'shipped', 'delivered')`
     )
     .get(v.id).n;
   const productCount = db.prepare('SELECT COUNT(*) n FROM products WHERE vendor_id = ?').get(v.id).n;
@@ -46,7 +49,8 @@ router.get('/', (req, res) => {
     .prepare(
       `SELECT oi.*, o.placed_at, o.ship_name, o.id AS order_id
        FROM order_items oi JOIN orders o ON o.id = oi.order_id
-       WHERE oi.vendor_id = ? ORDER BY o.id DESC LIMIT 6`
+       WHERE oi.vendor_id = ? AND o.status IN ('paid', 'shipped', 'delivered')
+       ORDER BY o.id DESC LIMIT 6`
     )
     .all(v.id);
 
@@ -156,7 +160,8 @@ router.get('/orders', (req, res) => {
        FROM order_items oi
        JOIN orders o ON o.id = oi.order_id
        JOIN users u ON u.id = o.buyer_id
-       WHERE oi.vendor_id = ? ORDER BY o.id DESC`
+       WHERE oi.vendor_id = ? AND o.status IN ('paid', 'shipped', 'delivered')
+       ORDER BY o.id DESC`
     )
     .all(req.vendor.id);
   res.render('seller/orders', { title: 'Orders to fulfil', items });
@@ -223,6 +228,10 @@ function readProductForm(req) {
 /** An order is only "shipped"/"delivered" when every line from every shop is. */
 function syncOrderStatus(orderId) {
   if (!orderId) return;
+  const order = db.prepare('SELECT status FROM orders WHERE id = ?').get(orderId);
+  // Never drag an unpaid or cancelled order into a fulfilment state.
+  if (!order || order.status === 'awaiting_payment' || order.status === 'cancelled') return;
+
   const rows = db.prepare('SELECT fulfil_status FROM order_items WHERE order_id = ?').all(orderId);
   if (!rows.length) return;
   const all = (s) => rows.every((r) => r.fulfil_status === s);

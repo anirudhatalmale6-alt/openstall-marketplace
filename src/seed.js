@@ -148,7 +148,7 @@ function run() {
   const hash = bcrypt.hashSync(PASSWORD, 10);
 
   db.exec(`
-    DELETE FROM order_items; DELETE FROM orders; DELETE FROM products;
+    DELETE FROM payments;    DELETE FROM order_items; DELETE FROM orders; DELETE FROM products;
     DELETE FROM vendors;     DELETE FROM categories; DELETE FROM users;
     DELETE FROM sqlite_sequence;
   `); // reset the id counters too, so demo URLs stay stable between re-seeds
@@ -196,6 +196,9 @@ function run() {
   const insItem = db.prepare(`INSERT INTO order_items
     (order_id, product_id, vendor_id, title, unit_price_cents, qty, commission_cents, fulfil_status)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`);
+  const insPayment = db.prepare(`INSERT INTO payments
+    (order_id, provider, reference, status, amount_cents, settled_at)
+    VALUES (?, 'demo', ?, 'paid', ?, datetime('now', ?))`);
 
   const BASKETS = [
     { buyer: 0, days: -18, status: 'delivered', fulfil: 'delivered', picks: [0, 7, 21] },
@@ -222,6 +225,7 @@ function run() {
         Math.round(it.price_cents * it.qty * it.commission_rate), b.fulfil
       );
     }
+    insPayment.run(oid, `demo_${oid}_${total}`, total, `${b.days} days`);
   }
 
   const n = (t) => db.prepare(`SELECT COUNT(*) c FROM ${t}`).get().c;

@@ -1,0 +1,20 @@
+<%- include('partials/head') %>
+<main>
+  <div class="wrap authwrap">
+    <div class="panel">
+      <h1>Sandbox checkout</h1>
+      <p class="muted">This stands in for the payment provider's own hosted page. Whichever provider
+        you choose, this is the point where the buyer leaves your site, pays, and is sent back.</p>
+      <p class="small muted mono">Reference: <%= reference %></p>
+
+      <form method="post" action="/payments/sandbox/<%= reference %>/complete" class="row" style="margin-top:1.2rem">
+        <button class="btn" type="submit" name="outcome" value="pay">Approve payment</button>
+        <button class="btn danger" type="submit" name="outcome" value="cancel">Cancel payment</button>
+      </form>
+
+      <p class="tiny muted" style="margin-top:1.2rem">Cancelling puts the reserved stock back and leaves
+        the order cancelled, exactly as a declined card would.</p>
+    </div>
+  </div>
+</main>
+<%- include('partials/foot') %>
