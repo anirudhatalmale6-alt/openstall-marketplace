@@ -1,0 +1,9 @@
+<nav class="sidenav">
+  <div class="hd">Your shop</div>
+  <a href="/seller" class="<%= path === '/seller' ? 'on' : '' %>">Dashboard</a>
+  <a href="/seller/products" class="<%= path.startsWith('/seller/products') ? 'on' : '' %>">Products</a>
+  <a href="/seller/orders" class="<%= path === '/seller/orders' ? 'on' : '' %>">Orders</a>
+  <a href="/seller/shop" class="<%= path === '/seller/shop' ? 'on' : '' %>">Shop profile</a>
+  <div class="hd">Storefront</div>
+  <a href="/shop/<%= vendor.slug %>">View public page</a>
+</nav>

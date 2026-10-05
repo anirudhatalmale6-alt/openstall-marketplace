@@ -1,0 +1,51 @@
+<%- include('partials/head') %>
+<main>
+  <div class="wrap">
+    <div class="pagehead"><h1>Checkout</h1><p>Delivery details, then payment. Nothing is charged in this demo.</p></div>
+
+    <div class="cartlayout">
+      <form method="post" action="/checkout" class="panel">
+        <% if (locals.errors && errors.length) { %>
+          <ul class="errors"><% errors.forEach(function (e) { %><li><%= e %></li><% }); %></ul>
+        <% } %>
+
+        <h3>Delivery address</h3>
+        <label class="field"><span>Full name</span>
+          <input type="text" name="ship_name" value="<%= form.ship_name || '' %>" required></label>
+        <label class="field"><span>Street address</span>
+          <input type="text" name="ship_address" value="<%= form.ship_address || '' %>" required></label>
+        <div class="grid2">
+          <label class="field"><span>City</span>
+            <input type="text" name="ship_city" value="<%= form.ship_city || '' %>" required></label>
+          <label class="field"><span>Postcode</span>
+            <input type="text" name="ship_zip" value="<%= form.ship_zip || '' %>" required></label>
+        </div>
+        <label class="field"><span>Country</span>
+          <input type="text" name="ship_country" value="<%= form.ship_country || '' %>" required></label>
+
+        <h3 style="margin-top:1.4rem">Payment</h3>
+        <div class="flash info" style="margin:0 0 1rem">
+          Demo mode: no card is taken and no money moves. Wiring this to Stripe Connect (so each seller is paid
+          directly and the marketplace keeps its commission) is a configuration step, not a rewrite.
+        </div>
+        <button class="btn block" type="submit">Place order &middot; <%= money(cart.total) %></button>
+      </form>
+
+      <aside class="panel">
+        <h3><%= cart.lines.length %> <%= cart.lines.length === 1 ? 'item' : 'items' %></h3>
+        <% cart.lines.forEach(function (l) { %>
+          <div class="summary-item">
+            <span><%= l.qty %> &times; <%= l.product.title %><br><span class="tiny muted"><%= l.product.shop_name %></span></span>
+            <span class="mono"><%= money(l.line_cents) %></span>
+          </div>
+        <% }); %>
+        <div class="totals" style="margin-top:.8rem">
+          <div class="line"><span>Subtotal</span><span class="mono"><%= money(cart.subtotal) %></span></div>
+          <div class="line"><span>Delivery</span><span class="mono"><%= cart.shipping ? money(cart.shipping) : 'Free' %></span></div>
+          <div class="line grand"><span>Total</span><span class="mono"><%= money(cart.total) %></span></div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</main>
+<%- include('partials/foot') %>

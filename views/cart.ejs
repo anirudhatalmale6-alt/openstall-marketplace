@@ -1,0 +1,65 @@
+<%- include('partials/head') %>
+<main>
+  <div class="wrap">
+    <div class="pagehead"><h1>Your basket</h1></div>
+
+    <% if (!cart.lines.length) { %>
+      <div class="panel empty">
+        <h2>Your basket is empty</h2>
+        <p>Have a look around - there is plenty to find.</p>
+        <a class="btn" href="/browse">Browse products</a>
+      </div>
+    <% } else { %>
+      <div class="cartlayout">
+        <div class="panel">
+          <% cart.lines.forEach(function (l) { %>
+            <div class="cartline">
+              <a href="/product/<%= l.product.id %>">
+                <img src="<%= imgFor(l.product) %>" alt="<%= l.product.title %>" width="84" height="84">
+              </a>
+              <div>
+                <div class="tiny muted" style="text-transform:uppercase;letter-spacing:.05em">
+                  <a href="/shop/<%= l.product.shop_slug %>" style="color:inherit"><%= l.product.shop_name %></a>
+                </div>
+                <strong><a href="/product/<%= l.product.id %>" style="color:var(--ink)"><%= l.product.title %></a></strong>
+                <div class="small muted mono"><%= money(l.product.price_cents) %> each</div>
+                <form method="post" action="/cart/update" class="row" style="margin-top:.5rem">
+                  <input type="hidden" name="product_id" value="<%= l.product.id %>">
+                  <input type="number" name="qty" value="<%= l.qty %>" min="1" max="<%= l.product.stock %>"
+                         style="width:72px" aria-label="Quantity">
+                  <button class="btn ghost sm" type="submit">Update</button>
+                  <button class="btn danger sm" type="submit" formaction="/cart/remove">Remove</button>
+                </form>
+              </div>
+              <div class="right">
+                <div class="mono" style="font-weight:600"><%= money(l.line_cents) %></div>
+              </div>
+            </div>
+          <% }); %>
+        </div>
+
+        <aside class="panel">
+          <h3>Order summary</h3>
+          <div class="totals">
+            <div class="line"><span>Subtotal</span><span class="mono"><%= money(cart.subtotal) %></span></div>
+            <div class="line">
+              <span>Delivery</span>
+              <span class="mono"><%= cart.shipping ? money(cart.shipping) : 'Free' %></span>
+            </div>
+            <% if (cart.shipping) { %>
+              <p class="tiny muted" style="margin:.2rem 0 0">
+                Add <%= money(7500 - cart.subtotal) %> more for free delivery.
+              </p>
+            <% } %>
+            <div class="line grand"><span>Total</span><span class="mono"><%= money(cart.total) %></span></div>
+          </div>
+          <a class="btn block" href="/checkout" style="margin-top:1rem">Checkout</a>
+          <p class="tiny muted center" style="margin:.7rem 0 0">
+            Items from different shops are split automatically and each seller ships their own part.
+          </p>
+        </aside>
+      </div>
+    <% } %>
+  </div>
+</main>
+<%- include('partials/foot') %>

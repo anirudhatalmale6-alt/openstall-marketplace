@@ -1,0 +1,58 @@
+<%- include('partials/head') %>
+<main>
+  <div class="wrap">
+    <div class="pagehead spread">
+      <div>
+        <h1>Order #<%= order.id %></h1>
+        <p>Placed <%= order.placed_at %> &middot;
+          <span class="badge <%= order.status === 'delivered' ? 'green' : order.status === 'shipped' ? 'blue' : order.status === 'cancelled' ? 'red' : 'amber' %>"><%= order.status %></span>
+        </p>
+      </div>
+      <a class="btn ghost" href="/account/orders">All your orders</a>
+    </div>
+
+    <div class="cartlayout">
+      <div class="panel">
+        <h3>Items</h3>
+        <% items.forEach(function (it) { %>
+          <div class="cartline" style="grid-template-columns:minmax(0,1fr) auto">
+            <div>
+              <div class="tiny muted" style="text-transform:uppercase;letter-spacing:.05em">
+                <a href="/shop/<%= it.shop_slug %>" style="color:inherit"><%= it.shop_name %></a>
+              </div>
+              <strong><%= it.title %></strong>
+              <div class="small muted"><%= it.qty %> &times; <%= money(it.unit_price_cents) %></div>
+            </div>
+            <div class="right">
+              <div class="mono" style="font-weight:600"><%= money(it.unit_price_cents * it.qty) %></div>
+              <span class="badge <%= it.fulfil_status === 'delivered' ? 'green' : it.fulfil_status === 'shipped' ? 'blue' : 'grey' %>"><%= it.fulfil_status %></span>
+            </div>
+          </div>
+        <% }); %>
+
+        <div class="steps">
+          <div class="step done"><div class="t">1. Payment</div><div class="v">Accepted</div></div>
+          <div class="step <%= order.status !== 'paid' ? 'done' : '' %>"><div class="t">2. Dispatch</div>
+            <div class="v"><%= order.status === 'paid' ? 'With the sellers' : 'Shipped' %></div></div>
+          <div class="step <%= order.status === 'delivered' ? 'done' : '' %>"><div class="t">3. Delivery</div>
+            <div class="v"><%= order.status === 'delivered' ? 'Delivered' : 'On the way' %></div></div>
+        </div>
+      </div>
+
+      <aside class="panel">
+        <h3>Delivering to</h3>
+        <p class="small" style="margin:0">
+          <%= order.ship_name %><br>
+          <%= order.ship_address %><br>
+          <%= order.ship_city %>, <%= order.ship_zip %><br>
+          <%= order.ship_country %>
+        </p>
+        <div class="totals" style="margin-top:1.2rem">
+          <div class="line grand"><span>Paid</span><span class="mono"><%= money(order.total_cents) %></span></div>
+        </div>
+        <a class="btn ghost block" href="/browse" style="margin-top:1rem">Keep shopping</a>
+      </aside>
+    </div>
+  </div>
+</main>
+<%- include('partials/foot') %>

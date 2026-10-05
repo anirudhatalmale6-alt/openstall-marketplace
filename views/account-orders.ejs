@@ -1,0 +1,30 @@
+<%- include('partials/head') %>
+<main>
+  <div class="wrap">
+    <div class="pagehead"><h1>Your orders</h1><p><%= orders.length %> in total.</p></div>
+
+    <% if (!orders.length) { %>
+      <div class="panel empty"><h2>No orders yet</h2><p>Once you buy something it will show up here.</p>
+        <a class="btn" href="/browse">Browse products</a></div>
+    <% } else { %>
+      <div class="tablewrap">
+        <table class="data">
+          <thead><tr><th>Order</th><th>Placed</th><th>Items</th><th class="num">Total</th><th>Status</th><th></th></tr></thead>
+          <tbody>
+            <% orders.forEach(function (o) { %>
+              <tr>
+                <td>#<%= o.id %></td>
+                <td class="small muted"><%= o.placed_at %></td>
+                <td><%= o.item_count %></td>
+                <td class="num mono"><%= money(o.total_cents) %></td>
+                <td><span class="badge <%= o.status === 'delivered' ? 'green' : o.status === 'shipped' ? 'blue' : o.status === 'cancelled' ? 'red' : 'amber' %>"><%= o.status %></span></td>
+                <td class="right"><a class="btn ghost sm" href="/order/<%= o.id %>">View</a></td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+  </div>
+</main>
+<%- include('partials/foot') %>

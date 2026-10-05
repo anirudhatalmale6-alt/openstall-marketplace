@@ -1,0 +1,27 @@
+<%- include('partials/head') %>
+<main>
+  <div class="wrap authwrap">
+    <div class="pagehead center"><h1>Sign in</h1><p>Buyers, sellers and admins all use this one form.</p></div>
+    <div class="panel">
+      <% if (locals.error) { %><div class="errors" style="list-style:none;padding-left:16px"><%= error %></div><% } %>
+      <form method="post" action="/login">
+        <label class="field"><span>Email</span>
+          <input type="email" name="email" value="<%= email %>" required autofocus></label>
+        <label class="field"><span>Password</span>
+          <input type="password" name="password" required></label>
+        <button class="btn block" type="submit">Sign in</button>
+      </form>
+      <p class="small center" style="margin:1rem 0 0">No account? <a href="/register">Create one</a></p>
+
+      <div class="demo-logins">
+        <strong>Demo accounts</strong> (password <code>demo1234</code>)
+        <ul style="margin:.4rem 0 0;padding-left:1.1rem">
+          <li>Admin &mdash; <code>admin@demo.test</code></li>
+          <li>Seller &mdash; <code>meera@kilnandclay.test</code></li>
+          <li>Buyer &mdash; <code>dana@example.test</code></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</main>
+<%- include('partials/foot') %>

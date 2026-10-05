@@ -1,0 +1,49 @@
+<%- include('partials/head') %>
+<main>
+  <div class="wrap">
+    <div class="pagehead spread">
+      <div>
+        <h1><%= activeCat ? activeCat.name : (q ? 'Search results' : 'Everything on OpenStall') %></h1>
+        <p>
+          <%= total %> <%= total === 1 ? 'product' : 'products' %>
+          <% if (q) { %> matching &ldquo;<%= q %>&rdquo;<% } %>
+        </p>
+      </div>
+      <form method="get" action="/browse" class="row">
+        <input type="hidden" name="q" value="<%= q %>">
+        <input type="hidden" name="cat" value="<%= cat %>">
+        <label class="small muted" for="sort">Sort</label>
+        <select name="sort" id="sort" onchange="this.form.submit()" style="width:auto">
+          <option value="new" <%= sort === 'new' ? 'selected' : '' %>>Newest first</option>
+          <option value="price-asc" <%= sort === 'price-asc' ? 'selected' : '' %>>Price: low to high</option>
+          <option value="price-desc" <%= sort === 'price-desc' ? 'selected' : '' %>>Price: high to low</option>
+        </select>
+      </form>
+    </div>
+
+    <% if (!products.length) { %>
+      <div class="panel empty">
+        <h2>Nothing matched</h2>
+        <p>Try a shorter search, or browse a category from the bar above.</p>
+        <a class="btn ghost" href="/browse">Clear filters</a>
+      </div>
+    <% } else { %>
+      <div class="pgrid">
+        <% products.forEach(function (p) { %><%- include('partials/pcard', { p: p }) %><% }); %>
+      </div>
+
+      <% if (pages > 1) {
+           const qs = (n) => `/browse?q=${encodeURIComponent(q)}&cat=${encodeURIComponent(cat)}&sort=${sort}&page=${n}`; %>
+        <nav class="pager">
+          <% if (page > 1) { %><a href="<%= qs(page - 1) %>">&larr; Prev</a><% } %>
+          <% for (let n = 1; n <= pages; n++) { %>
+            <% if (n === page) { %><span class="on"><%= n %></span>
+            <% } else { %><a href="<%= qs(n) %>"><%= n %></a><% } %>
+          <% } %>
+          <% if (page < pages) { %><a href="<%= qs(page + 1) %>">Next &rarr;</a><% } %>
+        </nav>
+      <% } %>
+    <% } %>
+  </div>
+</main>
+<%- include('partials/foot') %>

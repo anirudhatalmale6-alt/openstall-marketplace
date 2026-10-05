@@ -1,0 +1,78 @@
+<%- include('../partials/head') %>
+<main>
+  <div class="wrap applayout">
+    <%- include('nav') %>
+    <div>
+      <div class="pagehead">
+        <h1><%= product ? 'Edit product' : 'Add a product' %></h1>
+        <p><%= product ? 'Changes go live immediately.' : 'It will appear in your shop as soon as you save it.' %></p>
+      </div>
+
+      <div class="cartlayout">
+        <form class="panel" method="post" enctype="multipart/form-data"
+              action="<%= product ? `/seller/products/${product.id}/edit` : '/seller/products/new' %>">
+          <% if (errors.length) { %>
+            <ul class="errors"><% errors.forEach(function (e) { %><li><%= e %></li><% }); %></ul>
+          <% } %>
+
+          <label class="field"><span>Title</span>
+            <input type="text" name="title" value="<%= form.title || '' %>" required></label>
+
+          <label class="field"><span>Description</span>
+            <textarea name="description" placeholder="Materials, size, care instructions."><%= form.description || '' %></textarea></label>
+
+          <div class="grid2">
+            <label class="field"><span>Price (USD)</span>
+              <input type="text" name="price" value="<%= form.price || '' %>" placeholder="24.00" required></label>
+            <label class="field"><span>Stock on hand</span>
+              <input type="number" name="stock" value="<%= form.stock !== undefined ? form.stock : 1 %>" min="0" required></label>
+          </div>
+
+          <div class="grid2">
+            <label class="field"><span>Category</span>
+              <select name="category_id" required>
+                <option value="">Choose one</option>
+                <% categories.forEach(function (c) { %>
+                  <option value="<%= c.id %>" <%= Number(form.category_id) === c.id ? 'selected' : '' %>><%= c.name %></option>
+                <% }); %>
+              </select></label>
+            <label class="field"><span>Visibility</span>
+              <select name="status">
+                <option value="active" <%= form.status !== 'draft' ? 'selected' : '' %>>Listed - visible to buyers</option>
+                <option value="draft" <%= form.status === 'draft' ? 'selected' : '' %>>Draft - hidden</option>
+              </select></label>
+          </div>
+
+          <label class="field"><span>Photo (optional, JPG/PNG/WebP, max 4MB)</span>
+            <input type="file" name="photo" accept="image/*">
+            <span class="tiny muted">Leave empty and we generate cover art from the title.</span></label>
+
+          <div class="row">
+            <button class="btn" type="submit">Save product</button>
+            <a class="btn ghost" href="/seller/products">Cancel</a>
+          </div>
+        </form>
+
+        <aside class="panel">
+          <h3>Preview</h3>
+          <% if (product) { %>
+            <img src="<%= imgFor(product) %>" alt="" style="border-radius:var(--radius-sm);aspect-ratio:1/1;object-fit:cover">
+            <p class="small" style="margin:.7rem 0 0"><strong><%= product.title %></strong><br>
+              <span class="mono"><%= money(product.price_cents) %></span></p>
+            <p class="tiny muted"><%= product.stock %> in stock &middot; <%= product.status %></p>
+            <a class="btn ghost sm block" href="/product/<%= product.id %>" style="margin-top:.6rem">Open public page</a>
+          <% } else { %>
+            <p class="small muted" style="margin:0">Save the product to see how it looks on the storefront.</p>
+          <% } %>
+          <h3 style="margin-top:1.4rem">Tips</h3>
+          <ul class="small muted" style="padding-left:1.1rem;margin:0">
+            <li>Square photos crop best.</li>
+            <li>Put the size or weight in the description - it cuts down on questions.</li>
+            <li>Stock reduces automatically with each order.</li>
+          </ul>
+        </aside>
+      </div>
+    </div>
+  </div>
+</main>
+<%- include('../partials/foot') %>

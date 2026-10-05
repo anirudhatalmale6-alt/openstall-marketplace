@@ -1,0 +1,44 @@
+<%- include('partials/head') %>
+<main>
+  <div class="wrap">
+    <div class="cartlayout">
+      <div class="panel">
+        <h1>Open a shop on OpenStall</h1>
+        <p class="muted">Tell us about your shop. An admin reviews new shops before the listings go public - you can
+          add products straight away in the meantime.</p>
+
+        <% if (locals.errors && errors.length) { %>
+          <ul class="errors"><% errors.forEach(function (e) { %><li><%= e %></li><% }); %></ul>
+        <% } %>
+
+        <form method="post" action="/sell" style="margin-top:1rem">
+          <label class="field"><span>Shop name</span>
+            <input type="text" name="shop_name" value="<%= form.shop_name || '' %>" required
+                   placeholder="e.g. Kiln &amp; Clay"></label>
+          <label class="field"><span>One-line tagline</span>
+            <input type="text" name="tagline" value="<%= form.tagline || '' %>"
+                   placeholder="What you make, in a sentence"></label>
+          <label class="field"><span>About the shop</span>
+            <textarea name="description" placeholder="Who you are, how you make things, how fast you ship."><%= form.description || '' %></textarea></label>
+          <% if (!user) { %>
+            <p class="small muted">You will be asked to sign in or register first.</p>
+          <% } %>
+          <button class="btn" type="submit">Submit application</button>
+        </form>
+      </div>
+
+      <aside class="panel">
+        <h3>How selling works</h3>
+        <ol class="small" style="padding-left:1.1rem;color:var(--ink-2)">
+          <li style="margin-bottom:.5rem">Apply with your shop name and a short description.</li>
+          <li style="margin-bottom:.5rem">Add products with photos, prices and stock counts.</li>
+          <li style="margin-bottom:.5rem">An admin approves the shop and your listings go live.</li>
+          <li style="margin-bottom:.5rem">Buyers order, you mark items shipped from your dashboard.</li>
+          <li>The marketplace keeps a commission per sale; the rest is yours.</li>
+        </ol>
+        <p class="tiny muted">Commission is set per shop by the marketplace owner - 10% by default in this build.</p>
+      </aside>
+    </div>
+  </div>
+</main>
+<%- include('partials/foot') %>

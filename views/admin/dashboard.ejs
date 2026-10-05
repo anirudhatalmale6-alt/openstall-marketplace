@@ -1,0 +1,96 @@
+<%- include('../partials/head') %>
+<main>
+  <div class="wrap applayout">
+    <%- include('nav') %>
+    <div>
+      <div class="pagehead"><h1>Marketplace overview</h1><p>Everything across every shop.</p></div>
+
+      <div class="kpis">
+        <div class="kpi"><div class="label">GMV</div><div class="value mono"><%= money(kpi.gmv) %></div>
+          <div class="note"><%= kpi.orders %> orders</div></div>
+        <div class="kpi"><div class="label">Commission earned</div><div class="value mono"><%= money(kpi.commission) %></div>
+          <div class="note"><%= kpi.gmv ? (kpi.commission / kpi.gmv * 100).toFixed(1) : '0.0' %>% of GMV</div></div>
+        <div class="kpi"><div class="label">Live shops</div><div class="value mono"><%= kpi.shops %></div>
+          <div class="note"><%= kpi.pending %> awaiting approval</div></div>
+        <div class="kpi"><div class="label">Listings</div><div class="value mono"><%= kpi.products %></div>
+          <div class="note"><%= kpi.users %> registered users</div></div>
+      </div>
+
+      <% if (pending.length) { %>
+        <section class="section">
+          <h2>Waiting for approval</h2>
+          <div class="tablewrap">
+            <table class="data">
+              <thead><tr><th>Shop</th><th>Tagline</th><th>Applied</th><th></th></tr></thead>
+              <tbody>
+                <% pending.forEach(function (v) { %>
+                  <tr>
+                    <td><strong><%= v.shop_name %></strong></td>
+                    <td class="small muted"><%= v.tagline %></td>
+                    <td class="small muted"><%= v.created_at %></td>
+                    <td class="right">
+                      <div class="row" style="justify-content:flex-end;gap:.3rem">
+                        <form method="post" action="/admin/vendors/<%= v.id %>/status">
+                          <input type="hidden" name="status" value="approved">
+                          <button class="btn sm" type="submit">Approve</button>
+                        </form>
+                        <form method="post" action="/admin/vendors/<%= v.id %>/status">
+                          <input type="hidden" name="status" value="suspended">
+                          <button class="btn danger sm" type="submit">Reject</button>
+                        </form>
+                      </div>
+                    </td>
+                  </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      <% } %>
+
+      <section class="section">
+        <h2>Sales by shop</h2>
+        <div class="tablewrap">
+          <table class="data">
+            <thead><tr><th>Shop</th><th class="num">Rate</th><th class="num">Units</th>
+              <th class="num">Gross</th><th class="num">Commission</th><th class="num">Payable to seller</th></tr></thead>
+            <tbody>
+              <% byVendor.forEach(function (v) { %>
+                <tr>
+                  <td><a href="/shop/<%= v.slug %>"><%= v.shop_name %></a></td>
+                  <td class="num"><%= (v.commission_rate * 100).toFixed(0) %>%</td>
+                  <td class="num"><%= v.units %></td>
+                  <td class="num mono"><%= money(v.gross) %></td>
+                  <td class="num mono"><%= money(v.commission) %></td>
+                  <td class="num mono"><%= money(v.gross - v.commission) %></td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Recent orders</h2>
+        <div class="tablewrap">
+          <table class="data">
+            <thead><tr><th>Order</th><th>Buyer</th><th class="num">Items</th><th class="num">Total</th><th>Status</th><th></th></tr></thead>
+            <tbody>
+              <% recent.forEach(function (o) { %>
+                <tr>
+                  <td>#<%= o.id %><div class="tiny muted"><%= o.placed_at %></div></td>
+                  <td class="small"><%= o.buyer %></td>
+                  <td class="num"><%= o.items %></td>
+                  <td class="num mono"><%= money(o.total_cents) %></td>
+                  <td><span class="badge <%= o.status === 'delivered' ? 'green' : o.status === 'shipped' ? 'blue' : o.status === 'cancelled' ? 'red' : 'amber' %>"><%= o.status %></span></td>
+                  <td class="right"><a class="btn ghost sm" href="/order/<%= o.id %>">View</a></td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </div>
+</main>
+<%- include('../partials/foot') %>

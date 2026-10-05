@@ -1,0 +1,43 @@
+<%- include('../partials/head') %>
+<main>
+  <div class="wrap applayout">
+    <%- include('nav') %>
+    <div>
+      <div class="pagehead"><h1>Categories</h1><p>These drive the navigation bar and the browse filters.</p></div>
+
+      <div class="cartlayout">
+        <div class="tablewrap">
+          <table class="data">
+            <thead><tr><th>Name</th><th>Slug</th><th class="num">Products</th><th></th></tr></thead>
+            <tbody>
+              <% cats.forEach(function (c) { %>
+                <tr>
+                  <td><strong><%= c.name %></strong></td>
+                  <td class="small muted"><%= c.slug %></td>
+                  <td class="num"><%= c.products %></td>
+                  <td class="right">
+                    <form method="post" action="/admin/categories/<%= c.id %>/delete">
+                      <button class="btn danger sm" type="submit" <%= c.products ? 'disabled' : '' %>>Delete</button>
+                    </form>
+                  </td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+
+        <aside class="panel">
+          <h3>Add a category</h3>
+          <form method="post" action="/admin/categories">
+            <label class="field"><span>Name</span>
+              <input type="text" name="name" placeholder="e.g. Stationery" required></label>
+            <button class="btn block" type="submit">Add category</button>
+          </form>
+          <p class="tiny muted" style="margin-top:.8rem">A category with products in it cannot be deleted - move the
+            products first.</p>
+        </aside>
+      </div>
+    </div>
+  </div>
+</main>
+<%- include('../partials/foot') %>

@@ -1,0 +1,14 @@
+<article class="pcard">
+  <a class="cover" href="/product/<%= p.id %>">
+    <img src="<%= imgFor(p) %>" alt="<%= p.title %>" loading="lazy" width="400" height="400">
+  </a>
+  <div class="body">
+    <div class="shopline"><a href="/shop/<%= p.shop_slug %>"><%= p.shop_name %></a></div>
+    <h3><a href="/product/<%= p.id %>"><%= p.title %></a></h3>
+    <div class="price mono">
+      <%= money(p.price_cents) %>
+      <% if (p.stock < 1) { %><span class="oos">· sold out</span>
+      <% } else if (p.stock <= 5) { %><span class="tiny muted">· only <%= p.stock %> left</span><% } %>
+    </div>
+  </div>
+</article>

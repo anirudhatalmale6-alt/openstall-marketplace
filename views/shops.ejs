@@ -1,0 +1,28 @@
+<%- include('partials/head') %>
+<main>
+  <div class="wrap">
+    <div class="pagehead">
+      <h1>All shops</h1>
+      <p><%= shops.length %> independent shops selling on OpenStall.</p>
+    </div>
+    <div class="sgrid">
+      <% shops.forEach(function (s) { %>
+        <div class="scard">
+          <div class="row" style="align-items:flex-start">
+            <div class="avatar" style="background:<%= s.accent %>"><%= s.shop_name.slice(0,1) %></div>
+            <div class="grow">
+              <h3><a href="/shop/<%= s.slug %>"><%= s.shop_name %></a></h3>
+              <p class="small muted" style="margin:.15rem 0 0"><%= s.tagline %></p>
+            </div>
+          </div>
+          <p class="small" style="margin:.8rem 0 0"><%= s.description %></p>
+          <div class="spread" style="margin-top:1rem">
+            <span class="tiny muted"><%= s.product_count %> products</span>
+            <a class="btn ghost sm" href="/shop/<%= s.slug %>">Visit</a>
+          </div>
+        </div>
+      <% }); %>
+    </div>
+  </div>
+</main>
+<%- include('partials/foot') %>

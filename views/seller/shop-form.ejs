@@ -1,0 +1,40 @@
+<%- include('../partials/head') %>
+<main>
+  <div class="wrap applayout">
+    <%- include('nav') %>
+    <div>
+      <div class="pagehead"><h1>Shop profile</h1><p>This is what buyers see on your shop page.</p></div>
+
+      <div class="cartlayout">
+        <form class="panel" method="post" action="/seller/shop">
+          <% if (errors.length) { %>
+            <ul class="errors"><% errors.forEach(function (e) { %><li><%= e %></li><% }); %></ul>
+          <% } %>
+          <label class="field"><span>Shop name</span>
+            <input type="text" name="shop_name" value="<%= form.shop_name %>" required></label>
+          <label class="field"><span>Tagline</span>
+            <input type="text" name="tagline" value="<%= form.tagline %>"></label>
+          <label class="field"><span>About</span>
+            <textarea name="description"><%= form.description %></textarea></label>
+          <label class="field" style="max-width:200px"><span>Shop colour</span>
+            <input type="color" name="accent" value="<%= form.accent %>"></label>
+          <button class="btn" type="submit">Save profile</button>
+        </form>
+
+        <aside class="panel">
+          <h3>Status</h3>
+          <p style="margin:0">
+            <% if (vendor.status === 'approved') { %><span class="badge green">Approved</span>
+            <% } else if (vendor.status === 'pending') { %><span class="badge amber">Pending approval</span>
+            <% } else { %><span class="badge red">Suspended</span><% } %>
+          </p>
+          <p class="small muted">Commission on each sale: <strong><%= (vendor.commission_rate * 100).toFixed(0) %>%</strong>.
+            Only the marketplace owner can change this.</p>
+          <p class="small" style="margin-top:1rem">Public URL:<br>
+            <a href="/shop/<%= vendor.slug %>">/shop/<%= vendor.slug %></a></p>
+        </aside>
+      </div>
+    </div>
+  </div>
+</main>
+<%- include('../partials/foot') %>

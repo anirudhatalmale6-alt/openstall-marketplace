@@ -1,0 +1,59 @@
+<%- include('../partials/head') %>
+<main>
+  <div class="wrap applayout">
+    <%- include('nav') %>
+    <div>
+      <div class="pagehead"><h1>Shops</h1><p>Approve, suspend, and set the commission each shop pays.</p></div>
+
+      <div class="tablewrap">
+        <table class="data" style="min-width:820px">
+          <thead><tr><th>Shop</th><th>Owner</th><th class="num">Products</th><th class="num">Gross</th>
+            <th>Status</th><th>Commission</th><th></th></tr></thead>
+          <tbody>
+            <% vendors.forEach(function (v) { %>
+              <tr>
+                <td>
+                  <div class="row" style="gap:.6rem">
+                    <span class="avatar" style="background:<%= v.accent %>;width:32px;height:32px;border-radius:8px;display:grid;place-items:center;color:#fff;font-size:.9rem;font-family:Georgia,serif"><%= v.shop_name.slice(0,1) %></span>
+                    <span><strong><%= v.shop_name %></strong><div class="tiny muted"><%= v.tagline %></div></span>
+                  </div>
+                </td>
+                <td class="small"><%= v.owner %><div class="tiny muted"><%= v.email %></div></td>
+                <td class="num"><%= v.products %></td>
+                <td class="num mono"><%= money(v.gross) %></td>
+                <td><span class="badge <%= v.status === 'approved' ? 'green' : v.status === 'pending' ? 'amber' : 'red' %>"><%= v.status %></span></td>
+                <td>
+                  <form method="post" action="/admin/vendors/<%= v.id %>/commission" class="row" style="gap:.3rem">
+                    <input type="number" name="commission_pct" value="<%= (v.commission_rate * 100).toFixed(0) %>"
+                           min="0" max="50" step="1" style="width:70px" aria-label="Commission percent">
+                    <span class="small muted">%</span>
+                    <button class="btn ghost sm" type="submit">Set</button>
+                  </form>
+                </td>
+                <td class="right">
+                  <div class="row" style="justify-content:flex-end;gap:.3rem">
+                    <% if (v.status !== 'approved') { %>
+                      <form method="post" action="/admin/vendors/<%= v.id %>/status">
+                        <input type="hidden" name="status" value="approved">
+                        <button class="btn sm" type="submit">Approve</button>
+                      </form>
+                    <% } else { %>
+                      <form method="post" action="/admin/vendors/<%= v.id %>/status">
+                        <input type="hidden" name="status" value="suspended">
+                        <button class="btn danger sm" type="submit">Suspend</button>
+                      </form>
+                    <% } %>
+                    <a class="btn ghost sm" href="/shop/<%= v.slug %>">View</a>
+                  </div>
+                </td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+      <p class="tiny muted" style="margin-top:.7rem">Changing a rate affects future orders only - commission already
+        recorded on past order lines is left untouched.</p>
+    </div>
+  </div>
+</main>
+<%- include('../partials/foot') %>

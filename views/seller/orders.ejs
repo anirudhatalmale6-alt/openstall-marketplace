@@ -1,0 +1,49 @@
+<%- include('../partials/head') %>
+<main>
+  <div class="wrap applayout">
+    <%- include('nav') %>
+    <div>
+      <div class="pagehead">
+        <h1>Orders to fulfil</h1>
+        <p>You only see the lines that belong to your shop, with the buyer's delivery address.</p>
+      </div>
+
+      <% if (!items.length) { %>
+        <div class="panel empty"><h2>Nothing to ship</h2><p>New orders will land here.</p></div>
+      <% } else { %>
+        <div class="tablewrap">
+          <table class="data" style="min-width:760px">
+            <thead><tr><th>Order</th><th>Item</th><th class="num">Qty</th><th class="num">Value</th>
+              <th>Deliver to</th><th>Status</th><th>Mark as</th></tr></thead>
+            <tbody>
+              <% items.forEach(function (it) { %>
+                <tr>
+                  <td>#<%= it.order_id %><div class="tiny muted"><%= it.placed_at %></div></td>
+                  <td><strong><%= it.title %></strong><div class="tiny muted mono"><%= money(it.unit_price_cents) %> each</div></td>
+                  <td class="num"><%= it.qty %></td>
+                  <td class="num mono"><%= money(it.unit_price_cents * it.qty) %>
+                    <div class="tiny muted">-<%= money(it.commission_cents) %> fee</div></td>
+                  <td class="small"><%= it.ship_name %><br>
+                    <span class="muted"><%= it.ship_address %>, <%= it.ship_city %> <%= it.ship_zip %>, <%= it.ship_country %></span></td>
+                  <td><span class="badge <%= it.fulfil_status === 'delivered' ? 'green' : it.fulfil_status === 'shipped' ? 'blue' : 'grey' %>"><%= it.fulfil_status %></span></td>
+                  <td>
+                    <form method="post" action="/seller/orders/item/<%= it.id %>/status" class="row" style="gap:.3rem">
+                      <input type="hidden" name="order_id" value="<%= it.order_id %>">
+                      <select name="status" style="width:auto;font-size:.82rem;padding:5px 8px">
+                        <option value="processing" <%= it.fulfil_status === 'processing' ? 'selected' : '' %>>processing</option>
+                        <option value="shipped" <%= it.fulfil_status === 'shipped' ? 'selected' : '' %>>shipped</option>
+                        <option value="delivered" <%= it.fulfil_status === 'delivered' ? 'selected' : '' %>>delivered</option>
+                      </select>
+                      <button class="btn ghost sm" type="submit">Save</button>
+                    </form>
+                  </td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</main>
+<%- include('../partials/foot') %>

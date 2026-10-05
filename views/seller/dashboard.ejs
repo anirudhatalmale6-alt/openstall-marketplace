@@ -1,0 +1,84 @@
+<%- include('../partials/head') %>
+<main>
+  <div class="wrap applayout">
+    <%- include('nav') %>
+    <div>
+      <div class="pagehead spread">
+        <div>
+          <h1><%= vendor.shop_name %></h1>
+          <p>
+            <% if (vendor.status === 'approved') { %><span class="badge green">Approved &amp; live</span>
+            <% } else if (vendor.status === 'pending') { %><span class="badge amber">Awaiting admin approval</span>
+            <% } else { %><span class="badge red">Suspended</span><% } %>
+            <span class="small muted">&middot; commission <%= (vendor.commission_rate * 100).toFixed(0) %>%</span>
+          </p>
+        </div>
+        <a class="btn" href="/seller/products/new">Add a product</a>
+      </div>
+
+      <% if (vendor.status === 'pending') { %>
+        <div class="flash warn" style="max-width:none;margin:0 0 1.2rem">
+          Your shop is in the approval queue. Add your products now - they go public the moment an admin approves you.
+        </div>
+      <% } %>
+
+      <div class="kpis">
+        <div class="kpi"><div class="label">Gross sales</div><div class="value mono"><%= money(totals.gross) %></div>
+          <div class="note"><%= totals.units %> items across <%= totals.orders %> orders</div></div>
+        <div class="kpi"><div class="label">Your earnings</div><div class="value mono"><%= money(totals.net) %></div>
+          <div class="note">after <%= money(totals.commission) %> commission</div></div>
+        <div class="kpi"><div class="label">To fulfil</div><div class="value mono"><%= open %></div>
+          <div class="note">lines not yet delivered</div></div>
+        <div class="kpi"><div class="label">Products</div><div class="value mono"><%= productCount %></div>
+          <div class="note"><a href="/seller/products">manage listings</a></div></div>
+      </div>
+
+      <section class="section">
+        <h2>Latest orders</h2>
+        <% if (!recent.length) { %>
+          <div class="panel"><p class="muted" style="margin:0">No orders yet. They will appear here as they come in.</p></div>
+        <% } else { %>
+          <div class="tablewrap">
+            <table class="data">
+              <thead><tr><th>Order</th><th>Item</th><th>Buyer</th><th class="num">Qty</th><th class="num">Value</th><th>Status</th></tr></thead>
+              <tbody>
+                <% recent.forEach(function (r) { %>
+                  <tr>
+                    <td>#<%= r.order_id %><div class="tiny muted"><%= r.placed_at %></div></td>
+                    <td><%= r.title %></td>
+                    <td class="small"><%= r.ship_name %></td>
+                    <td class="num"><%= r.qty %></td>
+                    <td class="num mono"><%= money(r.unit_price_cents * r.qty) %></td>
+                    <td><span class="badge <%= r.fulfil_status === 'delivered' ? 'green' : r.fulfil_status === 'shipped' ? 'blue' : 'grey' %>"><%= r.fulfil_status %></span></td>
+                  </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
+          <p class="small" style="margin-top:.7rem"><a href="/seller/orders">Open the fulfilment queue &rarr;</a></p>
+        <% } %>
+      </section>
+
+      <% if (lowStock.length) { %>
+        <section class="section">
+          <h2>Running low</h2>
+          <div class="tablewrap">
+            <table class="data">
+              <thead><tr><th>Product</th><th class="num">Stock</th><th></th></tr></thead>
+              <tbody>
+                <% lowStock.forEach(function (p) { %>
+                  <tr>
+                    <td><%= p.title %></td>
+                    <td class="num"><span class="badge <%= p.stock === 0 ? 'red' : 'amber' %>"><%= p.stock %></span></td>
+                    <td class="right"><a class="btn ghost sm" href="/seller/products/<%= p.id %>/edit">Restock</a></td>
+                  </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      <% } %>
+    </div>
+  </div>
+</main>
+<%- include('../partials/foot') %>

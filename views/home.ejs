@@ -1,0 +1,80 @@
+<%- include('partials/head') %>
+
+<section class="hero">
+  <div class="wrap">
+    <h1>Good things, made by people you can actually reach.</h1>
+    <p class="lede">OpenStall is a marketplace for independent makers and small shops. Browse one basket across every
+      shop, pay once, and each seller ships your order directly.</p>
+    <div class="row">
+      <a class="btn" href="/browse">Start browsing</a>
+      <a class="btn ghost" href="/sell">Open your own shop</a>
+    </div>
+    <div class="herostats">
+      <div><b class="mono"><%= stats.shops %></b><span>Independent shops</span></div>
+      <div><b class="mono"><%= stats.products %></b><span>Products listed</span></div>
+      <div><b class="mono"><%= stats.orders %></b><span>Orders placed</span></div>
+    </div>
+  </div>
+</section>
+
+<main>
+  <div class="wrap">
+
+    <section>
+      <div class="chips">
+        <% counts.forEach(function (c) { %>
+          <a class="chip" href="/browse?cat=<%= c.slug %>"><%= c.name %> <b class="muted mono"><%= c.n %></b></a>
+        <% }); %>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="spread">
+        <div>
+          <h2>Just listed</h2>
+          <p class="muted small" style="margin:0">The newest things our sellers have put up.</p>
+        </div>
+        <a href="/browse" class="small">See everything &rarr;</a>
+      </div>
+      <div class="pgrid">
+        <% featured.forEach(function (p) { %><%- include('partials/pcard', { p: p }) %><% }); %>
+      </div>
+    </section>
+
+    <% if (popular.length) { %>
+    <section class="section">
+      <div class="spread">
+        <div><h2>Selling well</h2><p class="muted small" style="margin:0">Ranked by units actually sold.</p></div>
+        <a href="/browse?sort=new" class="small">All products &rarr;</a>
+      </div>
+      <div class="pgrid">
+        <% popular.forEach(function (p) { %><%- include('partials/pcard', { p: p }) %><% }); %>
+      </div>
+    </section>
+    <% } %>
+
+    <section class="section">
+      <div class="spread">
+        <div><h2>Meet the shops</h2><p class="muted small" style="margin:0">Each one is run by one or two people.</p></div>
+        <a href="/shops" class="small">All shops &rarr;</a>
+      </div>
+      <div class="sgrid">
+        <% shops.forEach(function (s) { %>
+          <div class="scard">
+            <div class="row" style="align-items:flex-start">
+              <div class="avatar" style="background:<%= s.accent %>"><%= s.shop_name.slice(0,1) %></div>
+              <div class="grow">
+                <h3><a href="/shop/<%= s.slug %>"><%= s.shop_name %></a></h3>
+                <p class="small muted" style="margin:.15rem 0 0"><%= s.tagline %></p>
+                <p class="tiny muted" style="margin:.5rem 0 0"><%= s.product_count %> products</p>
+              </div>
+            </div>
+          </div>
+        <% }); %>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<%- include('partials/foot') %>

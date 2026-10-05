@@ -1,0 +1,31 @@
+<%- include('partials/head') %>
+<main>
+  <div class="wrap">
+    <div class="panel" style="margin-bottom:1.6rem">
+      <div class="row" style="align-items:flex-start;gap:1.1rem">
+        <div class="avatar" style="background:<%= vendor.accent %>;width:66px;height:66px;border-radius:16px;display:grid;place-items:center;color:#fff;font-family:Georgia,serif;font-size:1.6rem;font-weight:600">
+          <%= vendor.shop_name.slice(0,1) %>
+        </div>
+        <div class="grow">
+          <h1 style="margin-bottom:.2rem"><%= vendor.shop_name %></h1>
+          <p class="muted" style="margin:0"><%= vendor.tagline %></p>
+          <p class="small" style="margin:.7rem 0 0;max-width:62ch"><%= vendor.description %></p>
+          <div class="row small muted" style="margin-top:.8rem">
+            <span class="badge green">Verified shop</span>
+            <span><%= products.length %> products</span>
+            <% if (sold) { %><span>&middot; <%= sold %> items sold</span><% } %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <% if (!products.length) { %>
+      <div class="panel empty"><h2>No products yet</h2><p>This shop has not listed anything.</p></div>
+    <% } else { %>
+      <div class="pgrid">
+        <% products.forEach(function (p) { %><%- include('partials/pcard', { p: p }) %><% }); %>
+      </div>
+    <% } %>
+  </div>
+</main>
+<%- include('partials/foot') %>

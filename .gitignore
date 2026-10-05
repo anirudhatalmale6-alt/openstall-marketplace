@@ -1,0 +1,7 @@
+node_modules/
+data/
+public/uploads/*
+!public/uploads/.gitkeep
+npm-debug.log*
+.env
+.DS_Store

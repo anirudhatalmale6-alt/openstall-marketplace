@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title><%= title %> &middot; OpenStall</title>
+<meta name="description" content="OpenStall - a marketplace for independent shops.">
+<link rel="stylesheet" href="/css/app.css">
+<link rel="icon" href="/favicon.svg">
+</head>
+<body>
+
+<div class="topbar">
+  <div class="wrap">
+    <span>Free delivery on orders over $75 · 30-day returns</span>
+    <span><a href="/sell">Sell on OpenStall</a></span>
+  </div>
+</div>
+
+<header class="site">
+  <div class="wrap">
+    <a class="logo" href="/"><span class="dot"></span>OpenStall</a>
+
+    <form class="search" action="/browse" method="get" role="search">
+      <input type="text" name="q" value="<%= q || '' %>" placeholder="Search products and shops" aria-label="Search">
+      <button type="submit">Search</button>
+    </form>
+
+    <nav class="main">
+      <a href="/shops" class="<%= path === '/shops' ? 'on' : '' %>">Shops</a>
+      <% if (user && user.role === 'admin') { %>
+        <a href="/admin" class="<%= path.startsWith('/admin') ? 'on' : '' %>">Admin</a>
+      <% } %>
+      <% if (vendor) { %>
+        <a href="/seller" class="<%= path.startsWith('/seller') ? 'on' : '' %>">My shop</a>
+      <% } else if (!user) { %>
+        <a href="/sell">Sell</a>
+      <% } %>
+      <% if (user) { %>
+        <a href="/account/orders" class="<%= path === '/account/orders' ? 'on' : '' %>">Orders</a>
+        <form method="post" action="/logout" style="display:inline">
+          <button type="submit" class="linkish">Sign out</button>
+        </form>
+      <% } else { %>
+        <a href="/login">Sign in</a>
+      <% } %>
+      <a href="/cart" class="basket <%= path === '/cart' ? 'on' : '' %>">Basket<% if (cartCount) { %><span class="pill"><%= cartCount %></span><% } %></a>
+    </nav>
+  </div>
+</header>
+
+<div class="catbar">
+  <div class="wrap">
+    <a href="/browse" class="<%= path === '/browse' && !locals.cat ? 'on' : '' %>">All</a>
+    <% categories.forEach(function (c) { %>
+      <a href="/browse?cat=<%= c.slug %>" class="<%= locals.cat === c.slug ? 'on' : '' %>"><%= c.name %></a>
+    <% }); %>
+  </div>
+</div>
+
+<% if (flash) { %>
+  <div class="wrap"><div class="flash <%= flash.type %>"><%= flash.text %></div></div>
+<% } %>

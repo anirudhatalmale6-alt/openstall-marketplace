@@ -1,0 +1,40 @@
+<%- include('../partials/head') %>
+<main>
+  <div class="wrap applayout">
+    <%- include('nav') %>
+    <div>
+      <div class="pagehead"><h1>All products</h1><p><%= products.length %> listings from every shop.</p></div>
+
+      <div class="tablewrap">
+        <table class="data" style="min-width:780px">
+          <thead><tr><th></th><th>Product</th><th>Shop</th><th>Category</th><th class="num">Price</th>
+            <th class="num">Stock</th><th>Status</th><th></th></tr></thead>
+          <tbody>
+            <% products.forEach(function (p) { %>
+              <tr>
+                <td><img src="<%= imgFor(p) %>" alt="" width="40" height="40"
+                         style="width:40px;height:40px;border-radius:7px;object-fit:cover"></td>
+                <td><strong><%= p.title %></strong></td>
+                <td class="small"><a href="/shop/<%= p.shop_slug %>"><%= p.shop_name %></a>
+                  <% if (p.shop_status !== 'approved') { %><span class="badge amber tiny"><%= p.shop_status %></span><% } %></td>
+                <td class="small muted"><%= p.category || '-' %></td>
+                <td class="num mono"><%= money(p.price_cents) %></td>
+                <td class="num"><%= p.stock %></td>
+                <td><span class="badge <%= p.status === 'active' ? 'green' : 'grey' %>"><%= p.status %></span></td>
+                <td class="right">
+                  <form method="post" action="/admin/products/<%= p.id %>/status">
+                    <input type="hidden" name="status" value="<%= p.status === 'active' ? 'draft' : 'active' %>">
+                    <button class="btn <%= p.status === 'active' ? 'danger' : 'ghost' %> sm" type="submit">
+                      <%= p.status === 'active' ? 'Unlist' : 'List' %>
+                    </button>
+                  </form>
+                </td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</main>
+<%- include('../partials/foot') %>
